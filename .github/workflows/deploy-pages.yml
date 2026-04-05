@@ -27,7 +27,7 @@ jobs:
 
       - name: Rebuild compressed dataset
         run: |
-          python - <<'PY'
+          python3 - <<'PY'
           from pathlib import Path
 
           parts = sorted(Path("pages-gzip").glob("mining_history.json.gz.b64.part*.txt"))
