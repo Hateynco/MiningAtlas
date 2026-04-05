@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MiningAtlas</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    :root {
+      --bg: #081018;
+      --panel: #101b27;
+      --panel-2: #162434;
+      --line: #23364b;
+      --text: #edf4fb;
+      --muted: #8da2b8;
+      --accent: #e4a93b;
+      --accent-2: #ef6f3c;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #13253a, var(--bg) 42%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 320px 1fr 360px;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "header header header"
+        "sidebar map ranking";
+    }
+
+    header {
+      grid-area: header;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(8, 16, 24, 0.86);
+      backdrop-filter: blur(12px);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.1rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+
+    .stats {
+      margin-left: auto;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .stat strong {
+      color: var(--accent);
+      margin-left: 6px;
+    }
+
+    aside, .panel {
+      background: rgba(16, 27, 39, 0.92);
+      backdrop-filter: blur(10px);
+    }
+
+    .sidebar {
+      grid-area: sidebar;
+      border-right: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .ranking {
+      grid-area: ranking;
+      border-left: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .panel-head {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-head h2, .panel-head h3 {
+      margin: 0;
+      font-size: 0.96rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .panel-head p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .search {
+      margin-top: 12px;
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #0c141d;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font: inherit;
+    }
+
+    .materials, .ranking-list {
+      overflow: auto;
+      padding: 10px 0 16px;
+      min-height: 0;
+    }
+
+    .cat {
+      padding: 12px 16px 6px;
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .material {
+      margin: 0 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid transparent;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .material:hover, .material.active {
+      background: rgba(228, 169, 59, 0.1);
+      border-color: rgba(228, 169, 59, 0.25);
+    }
+
+    .material strong { display: block; }
+    .material span { color: var(--muted); font-size: 0.84rem; }
+    .material-count {
+      color: var(--accent);
+      font-weight: 700;
+      align-self: center;
+    }
+
+    #map {
+      grid-area: map;
+      min-height: 65vh;
+    }
+
+    .hint {
+      position: absolute;
+      z-index: 600;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(8, 16, 24, 0.82);
+      border: 1px solid var(--line);
+      padding: 16px 18px;
+      border-radius: 14px;
+      color: var(--muted);
+      max-width: 320px;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    .detail {
+      padding: 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .detail h3 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .detail p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .rank-item {
+      margin: 0 10px 8px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: rgba(22, 36, 52, 0.72);
+      cursor: pointer;
+    }
+
+    .rank-item:hover {
+      border-color: rgba(228, 169, 59, 0.3);
+    }
+
+    .rank-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+      font-size: 0.95rem;
+    }
+
+    .rank-top strong {
+      font-size: 1rem;
+    }
+
+    .rank-meta {
+      color: var(--muted);
+      font-size: 0.86rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .bar {
+      margin-top: 10px;
+      height: 7px;
+      border-radius: 999px;
+      background: #0c141d;
+      overflow: hidden;
+    }
+
+    .bar > span {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+      background: #102030;
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .leaflet-container {
+      background: #091018;
+    }
+
+    @media (max-width: 1100px) {
+      .app {
+        grid-template-columns: 300px 1fr;
+        grid-template-areas:
+          "header header"
+          "sidebar map"
+          "ranking ranking";
+      }
+      .ranking {
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "sidebar"
+          "map"
+          "ranking";
+      }
+      .sidebar, .ranking {
+        border: 0;
+      }
+      header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .stats {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <h1>MiningAtlas</h1>
+        <p>Carte interactive des productions minieres mondiales par pays et par matiere.</p>
+      </div>
+      <div class="stats">
+        <div class="stat">Pays <strong id="stat-countries">-</strong></div>
+        <div class="stat">Matieres <strong id="stat-materials">-</strong></div>
+        <div class="stat">Entrees <strong id="stat-entries">-</strong></div>
+        <div class="stat">Annee <strong>2022</strong></div>
+      </div>
+    </header>
+
+    <aside class="sidebar panel">
+      <div class="panel-head">
+        <h2>Matieres premieres</h2>
+        <p>Selectionne une matiere pour afficher les producteurs sur la carte.</p>
+        <input id="search" class="search" type="search" placeholder="Rechercher une matiere" />
+      </div>
+      <div id="materials" class="materials"></div>
+    </aside>
+
+    <main style="position: relative;">
+      <div id="map"></div>
+      <div id="hint" class="hint">Chargement des donnees minières...</div>
+    </main>
+
+    <aside class="ranking panel">
+      <div id="detail" class="detail">
+        <h3>Classement mondial</h3>
+        <p>Le detail apparait ici apres selection d'une matiere.</p>
+      </div>
+      <div id="ranking" class="ranking-list"></div>
+    </aside>
+  </div>
+
+  <script>
+    const state = {
+      db: { materials: [], production: [] },
+      selectedMaterialId: null,
+      markers: [],
+      map: null
+    };
+
+    const els = {
+      search: document.getElementById("search"),
+      materials: document.getElementById("materials"),
+      ranking: document.getElementById("ranking"),
+      detail: document.getElementById("detail"),
+      hint: document.getElementById("hint"),
+      statCountries: document.getElementById("stat-countries"),
+      statMaterials: document.getElementById("stat-materials"),
+      statEntries: document.getElementById("stat-entries")
+    };
+
+    function countryFlag(iso2) {
+      if (!iso2 || iso2.length !== 2) return "GL";
+      return String.fromCodePoint(...iso2.toUpperCase().split("").map((char) => 127397 + char.charCodeAt(0)));
+    }
+
+    function formatNumber(value) {
+      const decimals = value >= 100 ? 0 : value >= 10 ? 1 : 2;
+      return new Intl.NumberFormat("fr-FR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: decimals
+      }).format(value);
+    }
+
+    function initMap() {
+      state.map = L.map("map", {
+        center: [20, 10],
+        zoom: 2.2,
+        minZoom: 2,
+        worldCopyJump: true
+      });
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+        attribution: "OpenStreetMap and CARTO",
+        subdomains: "abcd",
+        maxZoom: 18
+      }).addTo(state.map);
+    }
+
+    async function loadData() {
+      const response = await fetch("./db.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("Impossible de charger db.json");
+      state.db = await response.json();
+    }
+
+    function buildMaterials(filter = "") {
+      const needle = filter.trim().toLowerCase();
+      const counts = new Map();
+      for (const row of state.db.production) {
+        counts.set(row.material_id, (counts.get(row.material_id) || 0) + 1);
+      }
+
+      const categories = new Map();
+      for (const material of state.db.materials) {
+        const matches = !needle || material.name.toLowerCase().includes(needle) || material.category.toLowerCase().includes(needle);
+        if (!matches) continue;
+        if (!categories.has(material.category)) categories.set(material.category, []);
+        categories.get(material.category).push(material);
+      }
+
+      els.materials.innerHTML = "";
+      for (const category of [...categories.keys()].sort()) {
+        const cat = document.createElement("div");
+        cat.className = "cat";
+        cat.textContent = category;
+        els.materials.appendChild(cat);
+
+        for (const material of categories.get(category).sort((a, b) => a.name.localeCompare(b.name, "fr"))) {
+          const button = document.createElement("div");
+          button.className = "material" + (material.id === state.selectedMaterialId ? " active" : "");
+          button.innerHTML = "<div><strong>" + material.name + "</strong><span>" + material.unit + "</span></div><div class=\"material-count\">" + (counts.get(material.id) || 0) + "</div>";
+          button.addEventListener("click", () => selectMaterial(material.id));
+          els.materials.appendChild(button);
+        }
+      }
+    }
+
+    function clearMarkers() {
+      for (const marker of state.markers) marker.remove();
+      state.markers = [];
+    }
+
+    function getCurrentMaterial() {
+      return state.db.materials.find((material) => material.id === state.selectedMaterialId) || null;
+    }
+
+    function selectMaterial(materialId) {
+      state.selectedMaterialId = materialId;
+      buildMaterials(els.search.value);
+      renderMap();
+      renderRanking();
+    }
+
+    function renderMap() {
+      clearMarkers();
+      const material = getCurrentMaterial();
+      if (!material) return;
+
+      const rows = state.db.production
+        .filter((row) => row.material_id === material.id)
+        .sort((a, b) => b.quantity - a.quantity);
+
+      if (!rows.length) {
+        els.hint.textContent = "Aucune donnee pour cette matiere.";
+        return;
+      }
+
+      els.hint.style.display = "none";
+      const maxQuantity = Math.max(...rows.map((row) => row.quantity));
+      const total = rows.reduce((sum, row) => sum + row.quantity, 0);
+      const bounds = [];
+
+      for (const row of rows) {
+        const ratio = row.quantity / maxQuantity;
+        const radius = 8 + Math.pow(ratio, 0.55) * 28;
+        const share = total ? (row.quantity / total) * 100 : 0;
+        const marker = L.circleMarker([row.lat, row.lng], {
+          radius,
+          color: material.color,
+          weight: 1.4,
+          opacity: 0.8,
+          fillColor: material.color,
+          fillOpacity: 0.18 + ratio * 0.55
+        }).addTo(state.map);
+
+        marker.bindPopup(
+          "<strong>" + countryFlag(row.iso2) + " " + row.country_name + "</strong><br>" +
+          material.name + ": <strong>" + formatNumber(row.quantity) + " " + material.unit + "</strong><br>" +
+          "Part mondiale: " + share.toFixed(1) + "%" + (row.rank ? "<br>Rang: #" + row.rank : "") + (row.notes ? "<br>" + row.notes : "")
+        );
+
+        state.markers.push(marker);
+        bounds.push([row.lat, row.lng]);
+      }
+
+      if (bounds.length > 1) {
+        state.map.fitBounds(bounds, { padding: [30, 30], maxZoom: 4 });
+      }
+    }
+
+    function renderRanking() {
+      const material = getCurrentMaterial();
+      if (!material) return;
+
+      const rows = state.db.production
+        .filter((row) => row.material_id === material.id)
+        .sort((a, b) => b.quantity - a.quantity);
+      const total = rows.reduce((sum, row) => sum + row.quantity, 0);
+
+      els.detail.innerHTML = "<h3>" + material.name + "</h3><p>" + material.category + " | Unite: " + material.unit + (material.description ? "<br>" + material.description : "") + "</p>";
+      els.ranking.innerHTML = "";
+
+      for (const [index, row] of rows.entries()) {
+        const share = total ? (row.quantity / total) * 100 : 0;
+        const item = document.createElement("div");
+        item.className = "rank-item";
+        item.innerHTML = "<div class=\"rank-top\"><strong>#" + (index + 1) + " " + row.country_name + "</strong><span>" + formatNumber(row.quantity) + " " + material.unit + "</span></div>" +
+          "<div class=\"rank-meta\"><span>" + countryFlag(row.iso2) + " " + share.toFixed(1) + "% du total</span><span>" + (row.notes || "") + "</span></div>" +
+          "<div class=\"bar\"><span style=\"width:" + Math.max(share, 2) + "%\"></span></div>";
+        item.addEventListener("click", () => {
+          state.map.setView([row.lat, row.lng], 4, { animate: true });
+          const marker = state.markers[index];
+          if (marker) marker.openPopup();
+        });
+        els.ranking.appendChild(item);
+      }
+    }
+
+    async function boot() {
+      initMap();
+      try {
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        els.hint.textContent = "Le chargement a echoue. Verifie que db.json est publie sur GitHub Pages.";
+        return;
+      }
+
+      const countries = new Set(state.db.production.map((row) => row.iso2));
+      els.statCountries.textContent = String(countries.size);
+      els.statMaterials.textContent = String(state.db.materials.length);
+      els.statEntries.textContent = String(state.db.production.length);
+      els.hint.textContent = "Selectionne une matiere dans la colonne de gauche.";
+
+      buildMaterials();
+      const defaultMaterial = state.db.materials.find((material) => material.name === "Cuivre") || state.db.materials[0];
+      if (defaultMaterial) selectMaterial(defaultMaterial.id);
+    }
+
+    els.search.addEventListener("input", (event) => buildMaterials(event.target.value));
+    boot();
+  </script>
+</body>
+</html>

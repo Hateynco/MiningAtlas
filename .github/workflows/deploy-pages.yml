@@ -25,11 +25,27 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
       - name: Build static artifact
         run: |
           mkdir -p _site
+          python - <<'PY'
+          import base64
+          import gzip
+          from pathlib import Path
+
+          parts = sorted(Path('pages-gzip').glob('db.json.gz.b64.part*.txt'))
+          payload = ''.join(path.read_text(encoding='ascii') for path in parts)
+          data = gzip.decompress(base64.b64decode(payload))
+
+          Path('_site').mkdir(exist_ok=True)
+          Path('_site/db.json').write_bytes(data)
+          PY
           cp index.html _site/index.html
-          cp db.json _site/db.json
           touch _site/.nojekyll
 
       - name: Upload GitHub Pages artifact
