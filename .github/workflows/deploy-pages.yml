@@ -25,39 +25,27 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Rebuild source files
+      - name: Rebuild compressed dataset
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          def rebuild(target_name: str) -> None:
-            parts = sorted(Path("pages-src").glob(f"{target_name}.b64.part*.txt"))
-            if not parts:
-              raise SystemExit(f"Missing source parts for {target_name}")
-            payload = b"".join(path.read_bytes() for path in parts)
-            Path(target_name).write_bytes(payload)
-            print(f"Rebuilt {target_name} from {len(parts)} parts")
+          parts = sorted(Path("pages-gzip").glob("mining_history.json.gz.b64.part*.txt"))
+          if not parts:
+            raise SystemExit("Missing compressed history dataset parts")
 
-          rebuild("index.html")
-          rebuild("app.js")
-          rebuild("build_historical_db.py")
+          content = "".join(path.read_text(encoding="ascii") for path in parts)
+          Path("mining_history.json.gz.b64.txt").write_text(content, encoding="ascii")
+          print(f"Rebuilt mining_history.json.gz.b64.txt from {len(parts)} parts")
           PY
-
-      - name: Build mining history dataset
-        run: python build_historical_db.py
 
       - name: Build static artifact
         run: |
           mkdir -p _site
           cp index.html _site/index.html
           cp app.js _site/app.js
-          cp mining_history.json _site/mining_history.json
           cp mining_history.json.gz.b64.txt _site/mining_history.json.gz.b64.txt
+          cp db.json _site/db.json
           touch _site/.nojekyll
 
       - name: Upload GitHub Pages artifact
