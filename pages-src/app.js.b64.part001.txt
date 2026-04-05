@@ -1,0 +1,74 @@
+let DB = {
+  years: [],
+  default_year: 2022,
+  materials: [],
+  countries: [],
+  production: [],
+  exports: [],
+  meta: { notes: [] },
+};
+
+const state = {
+  selectedYear: 2022,
+  selectedMaterialId: null,
+  materialSearch: "",
+  countrySearch: "",
+  leftOpen: true,
+  rightOpen: true,
+};
+
+const refs = {};
+const cache = {
+  productionByYear: new Map(),
+  exportsByMaterialCountry: new Map(),
+  exportsByCountry: new Map(),
+  summaryByKey: new Map(),
+  materialById: new Map(),
+  countryByIso: new Map(),
+};
+
+let map = null;
+let markers = [];
+
+const POUNDS_PER_METRIC_TON = 2204.62262185;
+const TROY_OUNCES_PER_METRIC_TON = 32150.7465686;
+const BARRELS_PER_METRIC_TON_OIL = 7.33;
+const BARRELS_PER_YEAR_FROM_MBD = 365_000_000;
+const CUBIC_METERS_PER_GM3 = 1_000_000_000;
+
+function usdPerTonneFromCentsPerPound(value) {
+  return (Number(value || 0) / 100) * POUNDS_PER_METRIC_TON;
+}
+
+function usdPerTonneFromDollarsPerPound(value) {
+  return Number(value || 0) * POUNDS_PER_METRIC_TON;
+}
+
+function usdPerTonneFromDollarsPerKilogram(value) {
+  return Number(value || 0) * 1000;
+}
+
+function usdPerTonneFromDollarsPerTroyOunce(value) {
+  return Number(value || 0) * TROY_OUNCES_PER_METRIC_TON;
+}
+
+function usdPerTonneFromMetricTonUnit(value) {
+  return Number(value || 0) * 100;
+}
+
+const MARKET_BENCHMARKS = {
+  30: { priceUsd: 210, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "barite ex-works" },
+  28: { priceUsd: 1050, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "graphite flake" },
+  24: { priceUsd: 96, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "phosphate rock" },
+  25: { priceUsd: 690, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "potash MOP K2O eq." },
+  26: { priceUsd: 52.95, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "rock salt" },
+  27: { priceUsd: 46.42, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "elemental sulfur" },
+  29: { priceUsd: 497, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "ilmenite/leucoxene" },
+  7: { priceUsd: 331, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "chromite ore" },
+  5: { priceUsd: 100.1, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "iron ore" },
+  6: { priceUsd: usdPerTonneFromMetricTonUnit(5.53), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "manganese content" },
+  9: { priceUsd: 31, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "bauxite" },
+  8: { priceUsd: usdPerTonneFromCentsPerPound(414.7), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "copper LME cash" },
+  12: { priceUsd: 16812, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "nickel LME cash" },
+  11: { priceUsd: usdPerTonneFromCentsPerPound(108.8), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "lead North America" },
+  10: { priceUsd: usdPerTonneFromCentsPerPound(126), marketUnit: "t", b

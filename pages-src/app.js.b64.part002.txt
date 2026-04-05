@@ -1,0 +1,42 @@
+enchmarkYear: 2024, source: "USGS 2024", basis: "zinc LME cash" },
+  13: { priceUsd: usdPerTonneFromCentsPerPound(1368), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "tin LME cash" },
+  20: { priceUsd: usdPerTonneFromDollarsPerTroyOunce(28.37), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "silver bullion" },
+  19: { priceUsd: usdPerTonneFromDollarsPerTroyOunce(2388), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "gold" },
+  22: { priceUsd: usdPerTonneFromDollarsPerTroyOunce(994.9), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "palladium" },
+  21: { priceUsd: usdPerTonneFromDollarsPerTroyOunce(960.7), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "platinum" },
+  14: { priceUsd: usdPerTonneFromDollarsPerPound(11.84), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "cobalt LME cash" },
+  15: { priceUsd: 11800, marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "lithium carbonate" },
+  16: { priceUsd: 18000, marketUnit: "t", benchmarkYear: 2024, source: "USGS proxy 2024", basis: "rare earth basket" },
+  17: { priceUsd: usdPerTonneFromMetricTonUnit(252), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "WO3 concentrate" },
+  18: { priceUsd: usdPerTonneFromDollarsPerPound(5.44), marketUnit: "t", benchmarkYear: 2024, source: "USGS 2024", basis: "V2O5" },
+  23: { priceUsd: 11.3, marketUnit: "carat", benchmarkYear: 2024, source: "USGS 2024", basis: "diamond stones" },
+  1: { priceUsd: 105.6, marketUnit: "t", benchmarkYear: 2024, source: "World Bank 2024", basis: "coal South Africa" },
+  2: { priceUsd: 80.6, marketUnit: "barrel", benchmarkYear: 2024, source: "World Bank 2024", basis: "crude oil average" },
+  3: { priceUsd: 0.075, marketUnit: "m3", benchmarkYear: 2024, source: "World Bank 2024", basis: "gas U.S. Henry Hub proxy" },
+  4: { priceUsd: 190000, marketUnit: "t_u", benchmarkYear: 2024, source: "Proxy 2024", basis: "uranium U" },
+};
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function initRefs() {
+  refs.main = document.querySelector(".main");
+  refs.loading = $("loading");
+  refs.mapHint = $("map-hint");
+  refs.mapHintText = document.querySelector("#map-hint .map-hint-text");
+  refs.mapLegend = $("map-legend");
+  refs.mapLegendTitle = document.querySelector("#map-legend .legend-title");
+  refs.mapLegendLabels = document.querySelector("#map-legend .legend-labels");
+  refs.statCountries = $("stat-countries");
+  refs.statMaterials = $("stat-materials");
+  refs.statEntries = $("stat-entries");
+  refs.yearSelect = $("year-select");
+  refs.materialSearch = $("search-input");
+  refs.materialSearchRail = $("search-input-left-rail");
+  refs.countrySearch = $("country-search-input");
+  refs.countrySearchRail = $("search-input-right-rail");
+  refs.materialList = $("mat-list");
+  refs.detailHeader = $("detail-header");
+  refs.detailContent = $("detail-content");
+  refs.toggleLeft = $("toggle-le

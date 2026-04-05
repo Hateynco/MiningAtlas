@@ -1,19 +1,39 @@
 # MiningAtlas
 
-MiningAtlas is a public static Leaflet map for exploring mining production by country.
-It is already shareable from the public repository through a CDN URL:
+MiningAtlas is a public interactive Leaflet map for exploring global mining production, exports, and estimated market values by country and by mineral.
 
-`https://cdn.jsdelivr.net/gh/Hateynco/MiningAtlas@main/index.html`
+## Public site
 
-## Repository contents
+- Temporary test URL: `https://mouth-counter-order-conclude.trycloudflare.com`
+- Official GitHub Pages target: `https://hateynco.github.io/MiningAtlas/`
 
-- `index.html`: static frontend map and ranking UI
-- `pages-gzip/db.json.gz.b64.part001.txt` and `pages-gzip/db.json.gz.b64.part002.txt`: compressed data payload loaded directly by the frontend
-- `.github/workflows/deploy-pages.yml`: optional GitHub Pages deployment workflow kept in the repo
+## Main files
+
+- `index.html`: main HTML shell and styles
+- `app.js`: client-side logic, map rendering, filters, rankings, and popups
+- `mining_history.json.gz.b64.txt`: compressed historical dataset loaded directly by the frontend
+- `build_historical_db.py`: rebuilds the historical dataset from BGS, USGS, and the local seed file
+- `db.json`: local seed dataset kept for rebuilds and fallback
+- `.github/workflows/deploy-pages.yml`: GitHub Pages deployment workflow
+
+## Current features
+
+- year selector from `1960` to `2025` when data exists
+- collapsible left and right panels
+- full map mode with edge search rails
+- country popups on click
+- production and export history by country and by mineral
+- estimated production/export/domestic market values using USGS and World Bank price benchmarks
+- global mode listing all tracked minerals for each country
 
 ## Update later
 
-1. Update your local `index.html` and source data.
-2. Rebuild the compressed payload parts if the dataset changes.
-3. Push to `main`.
-4. The CDN URL serves the latest files after refresh and GitHub Pages can also be used later if desired.
+1. Update `index.html`, `app.js`, or `build_historical_db.py`.
+2. Rebuild the dataset with `python build_historical_db.py` if the source data changes.
+3. Commit and push to `main`.
+4. GitHub Pages redeploys automatically.
+
+## Notes
+
+- Market values are interface-level estimates, not customs-certified trade values.
+- Historical coverage before 1970 remains partial for some materials.

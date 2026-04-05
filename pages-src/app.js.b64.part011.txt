@@ -1,0 +1,81 @@
+.score), 0);
+  rows.forEach((row, index) => {
+    const item = document.createElement("div");
+    item.className = "rank-item fade-in";
+    item.style.setProperty("--bar-w", `${Math.round(((row.score || 0) / (maxScore || 1)) * 100)}%`);
+    const rankLabel = index < 3 ? ["1", "2", "3"][index] : `#${index + 1}`;
+    item.innerHTML = `
+      <div class="rank-num ${index === 0 ? "top1" : index === 1 ? "top2" : index === 2 ? "top3" : ""}">${rankLabel}</div>
+      <div class="rank-flag">${countryFlag(row.iso2)}</div>
+      <div class="rank-name">${escapeHtml(row.country_name)}</div>
+      <div class="rank-value">${escapeHtml(row.rankValue)}</div>
+      <div class="rank-share">${escapeHtml(row.share)}</div>
+    `;
+    item.addEventListener("click", () => {
+      map.setView([row.lat, row.lng], state.selectedMaterialId == null ? 4 : 5, { animate: true });
+    });
+    refs.detailContent.appendChild(item);
+  });
+}
+
+function renderMap() {
+  markers.forEach((marker) => marker.remove());
+  markers = [];
+
+  const material = materialById(state.selectedMaterialId);
+  const summaries = buildCountrySummaries(state.selectedYear, state.selectedMaterialId);
+
+  if (!summaries.length) {
+    refs.mapHint.style.opacity = "1";
+    refs.mapHintText.textContent = "Aucune donnee pour cette selection.";
+    refs.mapLegend.style.display = "none";
+    return;
+  }
+
+  refs.mapHint.style.opacity = "0";
+  refs.mapLegend.style.display = "block";
+  refs.mapLegendTitle.textContent = material ? `Production ${material.name}` : "Activite miniere agregee";
+  refs.mapLegendLabels.innerHTML = material
+    ? "<span>Faible</span><span>Eleve</span>"
+    : "<span>Diffuse</span><span>Concentree</span>";
+
+  summaries.forEach((summary) => {
+    const color = material?.color || "#4fc3f7";
+    const radius = material
+      ? 8 + 46 * Math.pow(summary.score || 0.02, 0.45)
+      : 10 + 12 * Math.sqrt(summary.score || 0.04);
+
+    const marker = L.circleMarker([summary.lat, summary.lng], {
+      radius,
+      fillColor: color,
+      fillOpacity: material ? 0.22 + summary.score * 0.48 : 0.28 + clamp(summary.score / 8, 0, 0.42),
+      color,
+      weight: 1.4,
+      opacity: 0.7,
+    });
+
+    marker.bindPopup("", {
+      maxWidth: 420,
+      className: "dark-popup",
+    });
+    marker.on("click", function handleClick() {
+      this.setPopupContent(buildPopupHtml(summary));
+    });
+    marker.addTo(map);
+    markers.push(marker);
+  });
+}
+
+function updateStats() {
+  const yearRows = getProductionRows(state.selectedYear);
+  const countrySet = new Set(yearRows.map((row) => row.country_iso2));
+  const materialSet = new Set(yearRows.map((row) => row.material_id));
+  refs.statCountries.textContent = countrySet.size;
+  refs.statMaterials.textContent = materialSet.size;
+  refs.statEntries.textContent = yearRows.length;
+}
+
+function applyPanelState() {
+  refs.main.classList.toggle("left-collapsed", !state.leftOpen);
+  refs.main.classList.toggle("right-collapsed", !state.rightOpen);
+  refs.toggleLeft.textContent = s

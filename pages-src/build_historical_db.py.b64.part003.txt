@@ -1,0 +1,85 @@
+ion"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Tungstène": {
+        "bgs_production": ["tungsten, mine"],
+        "bgs_exports": ["tungsten"],
+        "usgs2025": {"commodity": "Tungsten", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Tungsten",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Vanadium": {
+        "bgs_production": ["vanadium, mine"],
+        "bgs_exports": ["vanadium"],
+        "usgs2025": {"commodity": "Vanadium", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Vanadium",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Or": {
+        "bgs_production": ["gold, mine"],
+        "bgs_exports": ["gold"],
+        "usgs2025": {"commodity": "Gold", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Gold",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Argent": {
+        "bgs_production": ["silver, mine"],
+        "bgs_exports": ["silver"],
+        "usgs2025": {"commodity": "Silver", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Silver",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Platine": {"bgs_production": [], "bgs_exports": []},
+    "Palladium": {"bgs_production": [], "bgs_exports": []},
+    "Diamant": {
+        "bgs_production": ["diamond"],
+        "bgs_exports": ["diamond"],
+        "usgs2025": {"commodity": "Diamond (industrial)", "type_prefixes": ["mine production"]},
+    },
+    "Phosphate": {
+        "bgs_production": ["phosphate rock"],
+        "bgs_exports": ["phosphate rock"],
+        "usgs2025": {"commodity": "Phosphate rock", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Phosphate Rock",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Potasse": {
+        "bgs_production": ["potash"],
+        "bgs_exports": ["potash"],
+        "usgs2025": {"commodity": "Potash", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Potash",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Sel": {
+        "bgs_production": ["salt"],
+        "bgs_exports": ["salt"],
+        "usgs2025": {"commodity": "Salt", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Salt",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Soufre": {"bgs_production": [], "bgs_exports": ["sulphur and pyrites"]},
+    "Graphite": {
+        "bgs_production": ["graphite"],
+        "bgs_exports"

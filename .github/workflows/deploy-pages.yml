@@ -28,24 +28,54 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'
+          python-version: "3.12"
 
-      - name: Build static artifact
+      - name: Rebuild source files
         run: |
-          mkdir -p _site
+          python - <<'PY'
+          import base64
+          from pathlib import Path
+
+          def rebuild(target_name: str) -> None:
+            parts = sorted(Path("pages-src").glob(f"{target_name}.b64.part*.txt"))
+            if not parts:
+              raise SystemExit(f"Missing source parts for {target_name}")
+            payload = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+            Path(target_name).write_bytes(base64.b64decode(payload))
+            print(f"Rebuilt {target_name} from {len(parts)} parts")
+
+          rebuild("index.html")
+          rebuild("app.js")
+          rebuild("build_historical_db.py")
+          PY
+
+      - name: Rebuild seed database
+        run: |
           python - <<'PY'
           import base64
           import gzip
           from pathlib import Path
 
-          parts = sorted(Path('pages-gzip').glob('db.json.gz.b64.part*.txt'))
-          payload = ''.join(path.read_text(encoding='ascii') for path in parts)
-          data = gzip.decompress(base64.b64decode(payload))
+          parts = sorted(Path("pages-gzip").glob("db.json.gz.b64.part*.txt"))
+          if not parts:
+            raise SystemExit("Missing db.json compressed parts in pages-gzip/")
 
-          Path('_site').mkdir(exist_ok=True)
-          Path('_site/db.json').write_bytes(data)
+          payload = "".join(path.read_text(encoding="ascii").strip() for path in parts)
+          data = gzip.decompress(base64.b64decode(payload))
+          Path("db.json").write_bytes(data)
+          print("db.json rebuilt from repository parts")
           PY
+
+      - name: Build mining history dataset
+        run: python build_historical_db.py
+
+      - name: Build static artifact
+        run: |
+          mkdir -p _site
           cp index.html _site/index.html
+          cp app.js _site/app.js
+          cp mining_history.json _site/mining_history.json
+          cp mining_history.json.gz.b64.txt _site/mining_history.json.gz.b64.txt
           touch _site/.nojekyll
 
       - name: Upload GitHub Pages artifact

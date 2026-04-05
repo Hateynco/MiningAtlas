@@ -1,0 +1,94 @@
+"""
+Build a richer static mining dataset for the Leaflet frontend.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import csv
+import gzip
+import json
+import sys
+import urllib.parse
+import urllib.request
+from collections import defaultdict
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Dict, Iterable, List, Optional, Tuple
+import unicodedata
+
+
+ROOT = Path(__file__).resolve().parent
+CACHE_DIR = ROOT / ".source-cache"
+LOCAL_DB_PATH = ROOT / "db.json"
+OUTPUT_PATH = ROOT / "mining_history.json"
+COMPRESSED_OUTPUT_PATH = ROOT / "mining_history.json.gz.b64.txt"
+USGS_2025_PATH = ROOT / "usgs-world-2025" / "MCS2025_World_Data.csv"
+USGS_2026_PATH = ROOT / "MCS2026_Commodities_Data.csv"
+
+BGS_ITEMS_URL = "https://ogcapi.bgs.ac.uk/collections/world-mineral-statistics/items"
+USGS_2025_URL = (
+    "https://www.sciencebase.gov/catalog/file/get/"
+    "677eaf95d34e760b392c4970?f=__disk__70%2Fcf%2F36%2F70cf3695ad9405884df4a4758e4b609013e3fb1e"
+)
+USGS_2026_URL = (
+    "https://www.sciencebase.gov/catalog/file/get/"
+    "696a75d5d4be0228872d3bf8?f=__disk__eb%2F4d%2Fd1%2Feb4dd129d4f08cfba010a8b11cbbd2d88bbefdcb"
+)
+
+YEARS = list(range(1960, 2026))
+DEFAULT_YEAR = 2022
+
+
+SERIES_CONFIG = {
+    "Charbon": {"bgs_production": ["coal"], "bgs_exports": ["coal"]},
+    "Pétrole brut": {
+        "bgs_production": ["petroleum, crude"],
+        "bgs_exports": ["petroleum, crude"],
+    },
+    "Gaz naturel": {"bgs_production": ["natural gas"], "bgs_exports": []},
+    "Uranium": {"bgs_production": ["uranium"], "bgs_exports": []},
+    "Fer": {
+        "bgs_production": ["iron ore"],
+        "bgs_exports": ["iron ore"],
+        "usgs2025": {
+            "commodity": "Iron Ore",
+            "type_prefixes": ["mine production, iron content"],
+        },
+        "usgs2026": {
+            "commodity": "Iron Ore",
+            "detail_prefixes": ["mine production: iron content"],
+            "detail_excludes": ["rounded", "usable ore"],
+        },
+    },
+    "Manganèse": {
+        "bgs_production": ["manganese ore"],
+        "bgs_exports": ["manganese"],
+        "usgs2025": {
+            "commodity": "Manganese",
+            "type_prefixes": ["mine production, manganese content"],
+        },
+        "usgs2026": {
+            "commodity": "Manganese",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Chrome": {
+        "bgs_production": ["chromium ores and concentrates"],
+        "bgs_exports": ["chromium"],
+        "usgs2025": {
+            "commodity": "Chromium",
+            "type_prefixes": ["mine production, grosss weight"],
+        },
+        "usgs2026": {
+            "commodity": "Chromium",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Cuivre": {
+        "bgs_production": ["copper, mine"],
+        "bgs_exports": ["copper"],
+        "usgs2025": {"commodity": "Copper", "type_prefixes": ["mine 

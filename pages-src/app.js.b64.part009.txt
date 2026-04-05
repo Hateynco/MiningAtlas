@@ -1,0 +1,69 @@
+        <strong>${fmtUsdCompact(totalDomesticUsd)}</strong>
+          </div>
+        </div>
+      </div>
+      <div class="popup-material-list">${materialsHtml}</div>
+      <div class="popup-benchmark">La liste ci-dessous montre tous les minerais suivis pour ce pays, tries par valeur de production estimee.</div>
+    </div>
+  `;
+}
+
+function buildRankingRows() {
+  const material = materialById(state.selectedMaterialId);
+  const search = state.countrySearch.trim().toLowerCase();
+  const summaries = buildCountrySummaries(state.selectedYear, state.selectedMaterialId);
+  const filtered = summaries.filter((item) => item.name.toLowerCase().includes(search));
+
+  if (!material) {
+    refs.detailHeader.innerHTML = `
+      <div class="detail-material-name">Vue globale</div>
+      <div class="detail-desc">Quand aucune matiere n'est selectionnee, les totaux sont regroupes par unite pour eviter une somme trompeuse entre tonnes, carats, Mb/j ou Gm3.</div>
+      <div class="detail-desc">Les valeurs en dollars sont des estimations construites avec des reperes USGS/World Bank 2024-2025.</div>
+      <div class="detail-desc">${escapeHtml(DB.meta?.notes?.[2] || "")}</div>
+    `;
+    return filtered.map((summary) => {
+      const entries = buildGlobalMaterialEntries(summary);
+      const totalProductionUsd = sumDefined(entries.map((entry) => entry.production.usd));
+      return {
+        iso2: summary.iso2,
+        country_name: summary.name,
+        lat: summary.lat,
+        lng: summary.lng,
+        rankValue: `${summary.materialCount} mat.`,
+        share: fmtUsdCompact(totalProductionUsd),
+        score: summary.score,
+      };
+    });
+  }
+
+  refs.detailHeader.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="font-size:24px">${escapeHtml(material.icon || "[]")}</div>
+      <div class="detail-material-name">${escapeHtml(material.name)}</div>
+    </div>
+    <div class="detail-meta">
+      <span class="badge badge-cat">${escapeHtml(material.category)}</span>
+      <span class="badge badge-unit">${escapeHtml(material.unit)}</span>
+    </div>
+    <div class="detail-desc">${escapeHtml(material.description || "")}</div>
+    <div class="detail-desc">${escapeHtml(getCoverageLabel(material))}</div>
+    <div class="detail-desc">Valorisation estimee avec ${escapeHtml(getMaterialBenchmark(material.id)?.source || "un repere proxy")} ${getMaterialBenchmark(material.id)?.benchmarkYear || ""}.</div>
+  `;
+
+  return filtered.map((summary) => {
+    const economics = getCountryMaterialEconomics(summary.iso2, material.id, state.selectedYear, summary.topRow);
+    return {
+      iso2: summary.iso2,
+      country_name: summary.name,
+      lat: summary.lat,
+      lng: summary.lng,
+      quantity: summary.topRow.quantity,
+      rankValue: `${fmtNumber(summary.topRow.quantity)} ${material.unit}`,
+      share: fmtUsdCompact(economics.production.usd),
+      score: summary.score,
+    };
+  });
+}
+
+function buildMaterialList() {
+  refs.mate

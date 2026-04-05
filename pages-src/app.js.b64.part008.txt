@@ -1,0 +1,61 @@
+mmation interieure estimee</div>
+            <div class="popup-stat-main">
+              <span>${economics.exportsInfo.year === state.selectedYear ? "prod. - exp." : "estimation indisponible"}</span>
+              <strong>${fmtUsdCompact(economics.domesticUsd)}</strong>
+            </div>
+          </div>
+        </div>
+        <div class="popup-benchmark">Valeurs estimees avec ${escapeHtml(benchmarkText)} (${economics.benchmark?.benchmarkYear || "n.d."}).</div>
+      </div>
+    `;
+  }
+
+  const entries = buildGlobalMaterialEntries(summary);
+  const totalProductionUsd = sumDefined(entries.map((entry) => entry.production.usd));
+  const totalExportsUsd = sumDefined(entries.map((entry) => entry.exportsEstimate.usd));
+  const totalDomesticUsd = sumDefined(entries.map((entry) => entry.domesticUsd));
+  const materialsHtml = entries.map((entry) => {
+    const exportLabel = entry.exportsInfo.year == null ? "exp n.d." : `exp ${entry.exportsInfo.year}`;
+    return `
+      <div class="popup-material-row">
+        <div class="popup-material-top">
+          <span class="popup-material-name">${escapeHtml(entry.material?.name || "Matiere")}</span>
+          <span class="popup-material-qty">${fmtNumber(entry.row.quantity)} ${escapeHtml(entry.material?.unit || "")}</span>
+        </div>
+        <div class="popup-material-meta">
+          <span>prod <strong>${fmtUsdCompact(entry.production.usd)}</strong></span>
+          <span>${escapeHtml(exportLabel)} <strong>${fmtUsdCompact(entry.exportsEstimate.usd)}</strong></span>
+          <span>int. <strong>${fmtUsdCompact(entry.domesticUsd)}</strong></span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  return `
+    <div class="country-popup">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:22px">${countryFlag(summary.iso2)}</span>
+        <div class="popup-country">${escapeHtml(summary.name)}</div>
+      </div>
+      <div class="popup-unit">${summary.materialCount} matieres suivies en ${state.selectedYear}</div>
+      <div class="popup-share-bar"><div class="popup-share-fill" style="width:${clamp(summary.score * 14, 8, 100)}%"></div></div>
+      <div class="popup-stats">
+        <div class="popup-stat-card">
+          <div class="popup-stat-label">Valeur produite estimee</div>
+          <div class="popup-stat-main">
+            <span>Minerais suivis</span>
+            <strong>${fmtUsdCompact(totalProductionUsd)}</strong>
+          </div>
+        </div>
+        <div class="popup-stat-card">
+          <div class="popup-stat-label">Valeur exportee estimee</div>
+          <div class="popup-stat-main">
+            <span>Derniere annee export disponible</span>
+            <strong>${fmtUsdCompact(totalExportsUsd)}</strong>
+          </div>
+        </div>
+        <div class="popup-stat-card">
+          <div class="popup-stat-label">Valeur interieure estimee</div>
+          <div class="popup-stat-main">
+            <span>Quand prod. et exp. sont alignes</span>
+    

@@ -1,0 +1,63 @@
+ountries, bgs_production)
+    enrich_countries_with_bgs(countries, bgs_export_rows)
+    country_lookup = build_country_lookup(countries)
+
+    production_map: Dict[Tuple[str, int, int], dict] = {}
+    export_map: Dict[Tuple[str, int, int, str], dict] = {}
+
+    import_local_seed(production_map, local_rows)
+    import_bgs_production(production_map, bgs_production, material_ids, production_lookup, materials_meta)
+    import_bgs_exports(export_map, bgs_export_rows, material_ids, export_lookup)
+    import_usgs_2025(production_map, material_ids, materials_meta, country_lookup)
+    import_usgs_2026(production_map, material_ids, materials_meta, country_lookup)
+
+    production_records = list(production_map.values())
+    for row in production_records:
+        row.pop("_priority", None)
+    production_records.sort(key=lambda item: (item["year"], item["material_id"], item["country_iso2"]))
+    attach_ranks(production_records)
+
+    export_records = list(export_map.values())
+    export_records.sort(key=lambda item: (item["year"], item["material_id"], item["country_iso2"], item["unit"]))
+
+    coverage = build_coverage(materials, production_records, export_records)
+    for material in materials:
+        material["coverage"] = coverage[material["id"]]
+
+    payload = {
+        "generated_at": datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z"),
+        "default_year": DEFAULT_YEAR,
+        "years": YEARS,
+        "materials": materials,
+        "countries": sorted(countries.values(), key=lambda item: item["name"] or item["iso2"]),
+        "production": production_records,
+        "exports": export_records,
+        "meta": {
+            "description": "Historique minier enrichi combine BGS, USGS et la base locale d'origine.",
+            "notes": [
+                "Les donnees BGS couvrent la production 1970-2022 et les exports selon la disponibilite de l'archive.",
+                "Les donnees USGS prolongent une partie des minerais non energetiques jusqu'en 2025.",
+                "Les annees 1960-1969 sont presentes dans le selecteur pour accueillir l'archive historique, mais leur couverture reste partielle a ce stade.",
+            ],
+        },
+    }
+
+    OUTPUT_PATH.write_text(
+        json.dumps(payload, ensure_ascii=False, separators=(",", ":")),
+        encoding="utf-8",
+    )
+    compressed = gzip.compress(OUTPUT_PATH.read_bytes(), compresslevel=9)
+    COMPRESSED_OUTPUT_PATH.write_text(base64.b64encode(compressed).decode("ascii"), encoding="ascii")
+
+    log("")
+    log(f"Materials:   {len(materials)}")
+    log(f"Countries:   {len(payload['countries'])}")
+    log(f"Production:  {len(production_records)}")
+    log(f"Exports:     {len(export_records)}")
+    log(f"Written to:  {OUTPUT_PATH}")
+    log(f"Compressed:  {COMPRESSED_OUTPUT_PATH}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

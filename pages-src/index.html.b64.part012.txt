@@ -1,0 +1,30 @@
+
+    const loading = document.getElementById('loading');
+    loading.classList.add('done');
+    setTimeout(() => loading.remove(), 600);
+    return;
+  }
+
+  // Stats header
+  const countrySet = new Set(DB.production.map(p => p.iso2));
+  document.getElementById('stat-countries').textContent = countrySet.size;
+  document.getElementById('stat-materials').textContent = DB.materials.length;
+  document.getElementById('stat-entries').textContent = DB.production.length;
+
+  buildMaterialList();
+
+  // Auto-select Copper for a great first impression
+  const copper = DB.materials.find(m => m.name === 'Cuivre');
+  if (copper) setTimeout(() => selectMaterial(copper.id), 400);
+
+  // Hide loading
+  const loading = document.getElementById('loading');
+  loading.classList.add('done');
+  setTimeout(() => loading.remove(), 600);
+}
+
+boot();
+}
+</script>
+</body>
+</html>

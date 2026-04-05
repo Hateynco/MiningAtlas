@@ -1,0 +1,83 @@
+orm;
+    const share = (p.quantity / total * 100).toFixed(1);
+
+    const circle = L.circleMarker([p.lat, p.lng], {
+      radius: radius,
+      fillColor: mat.color,
+      fillOpacity: opacity,
+      color: mat.color,
+      weight: 1.5,
+      opacity: 0.6,
+    });
+
+    const popupHtml = `
+      <div class="country-popup">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+          <span style="font-size:22px">${countryFlag(p.iso2)}</span>
+          <div class="popup-country">${p.country_name}</div>
+        </div>
+        <div class="popup-qty">${fmtNum(p.quantity, mat.unit)}</div>
+        <div class="popup-unit">${mat.unit} de ${mat.name}</div>
+        <div class="popup-share-bar">
+          <div class="popup-share-fill" style="width:${share}%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted)">
+          <span>Part mondiale : <strong style="color:var(--accent)">${share}%</strong></span>
+          ${p.rank ? `<span>Rang #${p.rank}</span>` : ''}
+        </div>
+        ${p.notes ? `<div class="popup-note">💬 ${p.notes}</div>` : ''}
+      </div>
+    `;
+
+    circle.bindPopup(popupHtml, {
+      maxWidth: 300,
+      className: 'dark-popup'
+    });
+
+    circle.on('mouseover', function() { this.openPopup(); });
+    circle.addTo(map);
+    markers.push(circle);
+  });
+}
+
+// ─── Render ranking panel ─────────────────────────────────────────────
+function renderRanking() {
+  const mat = DB.materials.find(m => m.id === selectedMaterialId);
+  if (!mat) return;
+
+  const header = document.getElementById('detail-header');
+  header.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+      <div style="font-size:24px">${mat.icon}</div>
+      <div class="detail-material-name">${mat.name}</div>
+    </div>
+    <div class="detail-meta">
+      <span class="badge badge-cat">${mat.category}</span>
+      <span class="badge badge-unit">${mat.unit}</span>
+    </div>
+    ${mat.description ? `<div class="detail-desc">${mat.description}</div>` : ''}
+  `;
+
+  const prods = DB.production
+    .filter(p => p.material_id === selectedMaterialId)
+    .sort((a, b) => b.quantity - a.quantity);
+
+  const total = prods.reduce((s, p) => s + p.quantity, 0);
+  const content = document.getElementById('detail-content');
+  content.innerHTML = '';
+
+  if (!prods.length) {
+    content.innerHTML = '<div style="padding:20px;color:var(--text-muted);font-size:13px">Aucune donnée disponible</div>';
+    return;
+  }
+
+  // Top section header
+  const rankTitle = document.createElement('div');
+  rankTitle.className = 'ranking-title';
+  rankTitle.textContent = `Classement mondial — ${prods.length} pays producteurs`;
+  content.appendChild(rankTitle);
+
+  prods.forEach((p, i) => {
+    const rank = i + 1;
+    const share = total > 0 ? (p.quantity / total * 100) : 0;
+    const ba

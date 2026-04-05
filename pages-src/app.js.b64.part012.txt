@@ -1,0 +1,80 @@
+tate.leftOpen ? "<" : ">";
+  refs.toggleRight.textContent = state.rightOpen ? ">" : "<";
+  window.setTimeout(() => map?.invalidateSize(), 220);
+}
+
+function renderAll() {
+  buildMaterialList();
+  updateStats();
+  renderMap();
+  renderRanking();
+}
+
+function showLoadError(message) {
+  refs.mapHint.style.opacity = "1";
+  refs.mapHintText.textContent = message;
+  refs.detailHeader.innerHTML = `<div style="color:var(--text-muted);font-size:13px;padding-top:8px">${escapeHtml(message)}</div>`;
+  refs.detailContent.innerHTML = "";
+}
+
+async function loadData() {
+  const sources = [
+    async () => {
+      const response = await fetch("./mining_history.json");
+      if (!response.ok) throw new Error("mining_history.json unavailable");
+      return response.json();
+    },
+    async () => {
+      if (!window.pako) throw new Error("pako unavailable");
+      const response = await fetch("./mining_history.json.gz.b64.txt");
+      if (!response.ok) throw new Error("compressed history unavailable");
+      const base64 = (await response.text()).trim();
+      const binary = atob(base64);
+      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      const inflated = window.pako.inflate(bytes);
+      return JSON.parse(new TextDecoder().decode(inflated));
+    },
+    async () => {
+      if (!window.pako) throw new Error("pako unavailable");
+      const chunks = [];
+      for (let index = 1; index <= 32; index += 1) {
+        const part = String(index).padStart(3, "0");
+        const response = await fetch(`./pages-gzip/mining_history.json.gz.b64.part${part}.txt`);
+        if (!response.ok) {
+          if (!chunks.length) throw new Error("multipart history unavailable");
+          break;
+        }
+        chunks.push((await response.text()).trim());
+      }
+      if (!chunks.length) throw new Error("multipart history unavailable");
+      const binary = atob(chunks.join(""));
+      const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+      const inflated = window.pako.inflate(bytes);
+      return JSON.parse(new TextDecoder().decode(inflated));
+    },
+    async () => {
+      const response = await fetch("./db.json");
+      if (!response.ok) throw new Error("db.json unavailable");
+      return response.json();
+    },
+  ];
+
+  for (const loadSource of sources) {
+    try {
+      const payload = await loadSource();
+      if (payload.materials?.length && payload.production?.length) {
+        const countries = payload.countries?.length
+          ? payload.countries
+          : Array.from(
+              new Map(
+                payload.production.map((row) => [
+                  row.iso2 || row.country_iso2,
+                  {
+                    iso2: row.iso2 || row.country_iso2,
+                    iso3: row.iso3 || null,
+                    name: row.country_name || row.country || row.iso2 || row.country_iso2,
+                    lat: row.lat,
+                    lng: row.lng,
+                  },
+                ])
+              ).values()

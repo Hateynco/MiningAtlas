@@ -1,0 +1,87 @@
+production"]},
+        "usgs2026": {
+            "commodity": "Copper",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded", "refinery"],
+        },
+    },
+    "Aluminium/Bauxite": {
+        "bgs_production": ["bauxite"],
+        "bgs_exports": ["bauxite, alumina and aluminium"],
+        "usgs2025": {
+            "commodity": "Bauxite",
+            "type_prefixes": ["mine production, bauxite"],
+        },
+        "usgs2026": {
+            "commodity": "Bauxite",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Zinc": {
+        "bgs_production": ["zinc, mine"],
+        "bgs_exports": ["zinc"],
+        "usgs2025": {"commodity": "Zinc", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Zinc",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Plomb": {
+        "bgs_production": ["lead, mine"],
+        "bgs_exports": ["lead"],
+        "usgs2025": {"commodity": "Lead", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Lead",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Nickel": {
+        "bgs_production": ["nickel, mine"],
+        "bgs_exports": ["nickel"],
+        "usgs2025": {"commodity": "Nickel", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Nickel",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Étain": {
+        "bgs_production": ["tin, mine"],
+        "bgs_exports": ["tin"],
+        "usgs2025": {"commodity": "Tin", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Tin",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Cobalt": {
+        "bgs_production": ["cobalt, mine"],
+        "bgs_exports": ["cobalt"],
+        "usgs2025": {"commodity": "Cobalt", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Cobalt",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Lithium": {
+        "bgs_production": ["lithium minerals"],
+        "bgs_exports": ["lithium"],
+        "usgs2025": {"commodity": "Lithium", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Lithium",
+            "detail_prefixes": ["mine production"],
+            "detail_excludes": ["rounded"],
+        },
+    },
+    "Terres rares": {
+        "bgs_production": ["rare earth oxides"],
+        "bgs_exports": ["rare earths"],
+        "usgs2025": {"commodity": "Rare earths", "type_prefixes": ["mine production"]},
+        "usgs2026": {
+            "commodity": "Rare Earths",
+            "detail_prefixes": ["mine product
