@@ -1,20 +1,19 @@
 # MiningAtlas
 
 MiningAtlas is a public static Leaflet map for exploring mining production by country.
-The published site is designed for GitHub Pages and rebuilds its `db.json` payload from compressed text parts stored in the repository.
+It is already shareable from the public repository through a CDN URL:
 
-## Files
+`https://cdn.jsdelivr.net/gh/Hateynco/MiningAtlas@main/index.html`
+
+## Repository contents
 
 - `index.html`: static frontend map and ranking UI
-- `.github/workflows/deploy-pages.yml`: GitHub Pages deployment workflow
-- `pages-gzip/db.json.gz.b64.part001.txt` and `pages-gzip/db.json.gz.b64.part002.txt`: compressed data payload used to rebuild `db.json` during deployment
+- `pages-gzip/db.json.gz.b64.part001.txt` and `pages-gzip/db.json.gz.b64.part002.txt`: compressed data payload loaded directly by the frontend
+- `.github/workflows/deploy-pages.yml`: optional GitHub Pages deployment workflow kept in the repo
 
 ## Update later
 
-1. Update your local `db.json` and `index.html`.
-2. Regenerate the compressed payload parts if the data changes.
+1. Update your local `index.html` and source data.
+2. Rebuild the compressed payload parts if the dataset changes.
 3. Push to `main`.
-4. GitHub Pages redeploys automatically.
-
-Expected public URL:
-`https://hateynco.github.io/MiningAtlas/`
+4. The CDN URL serves the latest files after refresh and GitHub Pages can also be used later if desired.

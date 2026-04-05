@@ -6,6 +6,7 @@
   <title>MiningAtlas</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js"></script>
   <style>
     :root {
       --bg: #081018;
@@ -332,7 +333,7 @@
 
     <main style="position: relative;">
       <div id="map"></div>
-      <div id="hint" class="hint">Chargement des donnees minières...</div>
+      <div id="hint" class="hint">Chargement des donnees minieres...</div>
     </main>
 
     <aside class="ranking panel">
@@ -376,6 +377,15 @@
       }).format(value);
     }
 
+    function decodeBase64(base64Text) {
+      const binary = atob(base64Text);
+      const bytes = new Uint8Array(binary.length);
+      for (let index = 0; index < binary.length; index += 1) {
+        bytes[index] = binary.charCodeAt(index);
+      }
+      return bytes;
+    }
+
     function initMap() {
       state.map = L.map("map", {
         center: [20, 10],
@@ -392,9 +402,19 @@
     }
 
     async function loadData() {
-      const response = await fetch("./db.json", { cache: "no-store" });
-      if (!response.ok) throw new Error("Impossible de charger db.json");
-      state.db = await response.json();
+      const responses = await Promise.all([
+        fetch("./pages-gzip/db.json.gz.b64.part001.txt", { cache: "no-store" }),
+        fetch("./pages-gzip/db.json.gz.b64.part002.txt", { cache: "no-store" })
+      ]);
+
+      if (responses.some((response) => !response.ok)) {
+        throw new Error("Impossible de charger les fichiers de donnees compressees.");
+      }
+
+      const payload = (await responses[0].text()).trim() + (await responses[1].text()).trim();
+      const compressed = decodeBase64(payload);
+      const jsonText = new TextDecoder().decode(window.pako.ungzip(compressed));
+      state.db = JSON.parse(jsonText);
     }
 
     function buildMaterials(filter = "") {
@@ -526,7 +546,7 @@
         await loadData();
       } catch (error) {
         console.error(error);
-        els.hint.textContent = "Le chargement a echoue. Verifie que db.json est publie sur GitHub Pages.";
+        els.hint.textContent = "Le chargement a echoue. Verifie que les deux fichiers pages-gzip sont bien accessibles.";
         return;
       }
 
