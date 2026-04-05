@@ -33,15 +33,14 @@ jobs:
       - name: Rebuild source files
         run: |
           python - <<'PY'
-          import base64
           from pathlib import Path
 
           def rebuild(target_name: str) -> None:
             parts = sorted(Path("pages-src").glob(f"{target_name}.b64.part*.txt"))
             if not parts:
               raise SystemExit(f"Missing source parts for {target_name}")
-            payload = "".join(path.read_text(encoding="ascii").strip() for path in parts)
-            Path(target_name).write_bytes(base64.b64decode(payload))
+            payload = b"".join(path.read_bytes() for path in parts)
+            Path(target_name).write_bytes(payload)
             print(f"Rebuilt {target_name} from {len(parts)} parts")
 
           rebuild("index.html")
