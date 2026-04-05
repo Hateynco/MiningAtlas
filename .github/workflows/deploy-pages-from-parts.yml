@@ -1,0 +1,66 @@
+name: Deploy GitHub Pages (from parts)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-from-parts
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Rebuild app shell
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+
+          index_parts = sorted(Path("pages-src").glob("index.html.b64.part*.txt"))
+          if not index_parts:
+            raise SystemExit("Missing index.html parts in pages-src/")
+          Path("index.html").write_bytes(b"".join(path.read_bytes() for path in index_parts))
+
+          app_parts = sorted(Path("pages-src").glob("app.js.b64.part*.txt"))
+          if not app_parts:
+            raise SystemExit("Missing app.js parts in pages-src/")
+          Path("app.js").write_bytes(b"".join(path.read_bytes() for path in app_parts))
+          PY
+
+      - name: Build static artifact
+        run: |
+          mkdir -p _site
+          cp index.html _site/index.html
+          cp app.js _site/app.js
+          cp mining_history.json.gz.b64.txt _site/mining_history.json.gz.b64.txt
+          touch _site/.nojekyll
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
