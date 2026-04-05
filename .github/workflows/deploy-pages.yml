@@ -25,6 +25,24 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
+      - name: Rebuild app shell
+        run: |
+          python3 - <<'PY'
+          import base64
+          from pathlib import Path
+
+          index_parts = sorted(Path("pages-src").glob("index.html.b64.part*.txt"))
+          if not index_parts:
+            raise SystemExit("Missing index.html parts in pages-src/")
+          index_base64 = "".join(path.read_text(encoding="ascii") for path in index_parts)
+          Path("index.html").write_bytes(base64.b64decode(index_base64))
+
+          app_parts = sorted(Path("pages-src").glob("app.js.b64.part*.txt"))
+          if not app_parts:
+            raise SystemExit("Missing app.js parts in pages-src/")
+          Path("app.js").write_bytes(b"".join(path.read_bytes() for path in app_parts))
+          PY
+
       - name: Build static artifact
         run: |
           mkdir -p _site
