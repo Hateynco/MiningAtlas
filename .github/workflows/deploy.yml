@@ -30,6 +30,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Rebuild site archive
+        run: python .build/rebuild_zip.py
+
       - name: Validate site archive
         run: python -m zipfile -t site-source.zip
 
