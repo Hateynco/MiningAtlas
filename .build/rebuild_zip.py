@@ -14,7 +14,10 @@ def main() -> None:
     if not parts:
         raise FileNotFoundError("No build fragments found for site-source.zip")
 
-    encoded = "".join(part.read_text(encoding="utf-8").strip() for part in parts)
+    encoded = "".join(
+        part.read_text(encoding="utf-8").replace("\ufeff", "").strip()
+        for part in parts
+    )
     OUTPUT_PATH.write_bytes(base64.b64decode(encoded))
 
 
