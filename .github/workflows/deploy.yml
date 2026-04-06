@@ -30,17 +30,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Unpack site source
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          from zipfile import ZipFile
+      - name: Validate site archive
+        run: python -m zipfile -t site-source.zip
 
-          target = Path("site")
-          target.mkdir(exist_ok=True)
-          with ZipFile("site-source.zip") as archive:
-              archive.extractall(target)
-          PY
+      - name: Unpack site source
+        run: python -m zipfile -e site-source.zip site
 
       - name: Download runtime assets
         working-directory: site
@@ -53,6 +47,9 @@ jobs:
       - name: Generate atlas data
         working-directory: site
         run: python scripts/generate_data.py
+
+      - name: Disable Jekyll
+        run: touch site/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
