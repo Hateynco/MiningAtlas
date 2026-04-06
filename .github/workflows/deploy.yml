@@ -31,7 +31,16 @@ jobs:
           python-version: "3.12"
 
       - name: Unpack site source
-        run: unzip -o site-source.zip -d site
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          target = Path("site")
+          target.mkdir(exist_ok=True)
+          with ZipFile("site-source.zip") as archive:
+              archive.extractall(target)
+          PY
 
       - name: Download runtime assets
         working-directory: site
