@@ -25,15 +25,15 @@ jobs:
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
 
-      - name: Rebuild app shell
+      - name: Rebuild static shell
         run: |
           python3 - <<'PY'
           import base64
           from pathlib import Path
 
-          index_parts = sorted(Path("pages-src").glob("index.html.b64.part*.txt"))
+          index_parts = sorted(Path("pages-src-v2").glob("index.html.b64.part*.txt"))
           if not index_parts:
-            raise SystemExit("Missing index.html parts in pages-src/")
+            raise SystemExit("Missing index.html parts in pages-src-v2/")
           index_base64 = "".join(path.read_text(encoding="ascii") for path in index_parts)
           Path("index.html").write_bytes(base64.b64decode(index_base64))
 
