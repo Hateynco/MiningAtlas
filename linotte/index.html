@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linotte — Le soin du linge, la chaleur du lien</title>
+
+    <style>
+        :root {
+            --cream: #fff8ef;
+            --cream-dark: #f4e7d9;
+            --terracotta: #df7a5c;
+            --terracotta-dark: #c8654a;
+            --green: #3f5f4a;
+            --sage: #8fa184;
+            --white: #ffffff;
+            --text: #263238;
+        }
+
+        * {
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background-color: var(--cream);
+            color: var(--text);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: rgba(255, 248, 239, 0.96);
+            border-bottom: 1px solid rgba(63, 95, 74, 0.15);
+        }
+
+        nav {
+            max-width: 1200px;
+            margin: auto;
+            padding: 18px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 34px;
+            font-weight: bold;
+            color: var(--green);
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: var(--terracotta);
+        }
+
+        .menu {
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .menu a {
+            text-decoration: none;
+            color: var(--green);
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .menu a:hover {
+            color: var(--terracotta);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 13px 22px;
+            background-color: var(--terracotta);
+            color: white;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: var(--terracotta-dark);
+        }
+
+        section {
+            max-width: 1200px;
+            margin: auto;
+            padding: 85px 30px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 50px;
+            align-items: center;
+            min-height: 86vh;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: var(--cream-dark);
+            color: var(--green);
+            padding: 9px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 58px;
+            line-height: 1.05;
+            color: var(--green);
+            margin: 0 0 24px;
+        }
+
+        h1 span,
+        h2 span {
+            color: var(--terracotta);
+        }
+
+        h2 {
+            font-size: 40px;
+            color: var(--green);
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: var(--green);
+            font-size: 23px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 17px;
+            line-height: 1.7;
+        }
+
+        .lead {
+            font-size: 20px;
+            max-width: 670px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #ffffff, #f4e7d9);
+            border-radius: 35px;
+            padding: 45px;
+            text-align: center;
+            box-shadow: 0 18px 40px rgba(63, 95, 74, 0.13);
+        }
+
+        .bird {
+            font-size: 90px;
+            margin-bottom: 20px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 12px 30px rgba(63, 95, 74, 0.10);
+        }
+
+        .icon {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .two-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 35px;
+            margin-top: 35px;
+        }
+
+        .soft-block {
+            background: linear-gradient(135deg, #ffffff, #f4e7d9);
+            padding: 45px;
+            border-radius: 30px;
+            box-shadow: 0 12px 30px rgba(63, 95, 74, 0.10);
+            margin-top: 35px;
+        }
+
+        .price {
+            color: var(--terracotta);
+            font-size: 30px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .steps {
+            counter-reset: step;
+            display: grid;
+            gap: 18px;
+        }
+
+        .step {
+            background-color: var(--white);
+            border-radius: 20px;
+            padding: 22px 22px 22px 70px;
+            position: relative;
+        }
+
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 22px;
+            top: 22px;
+            width: 35px;
+            height: 35px;
+            background-color: var(--terracotta);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        form {
+            display: grid;
+            gap: 15px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 14px;
+            border: 1px solid rgba(63, 95, 74, 0.25);
+            font-family: inherit;
+            font-size: 15px;
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+        }
+
+        .notice {
+            background-color: var(--white);
+            border-left: 5px solid var(--terracotta);
+            padding: 18px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+
+        footer {
+            background-color: var(--green);
+            color: white;
+            text-align: center;
+            padding: 35px 20px;
+        }
+
+        footer p {
+            color: white;
+            margin: 5px;
+        }
+
+        @media (max-width: 850px) {
+            nav {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero,
+            .two-columns,
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 42px;
+            }
+
+            h2 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <nav>
+        <div class="logo">Lin<span>otte</span></div>
+
+        <div class="menu">
+            <a href="#accueil">Accueil</a>
+            <a href="#histoire">Histoire</a>
+            <a href="#services">Services</a>
+            <a href="#contact">Contact</a>
+            <a href="#vie-privee">Vie privée</a>
+        </div>
+    </nav>
+</header>
+
+<section id="accueil" class="hero">
+    <div>
+        <div class="badge">Conciergerie solidaire de quartier</div>
+
+        <h1>Le soin du linge, <br><span>la chaleur du lien.</span></h1>
+
+        <p class="lead">
+            Linotte met en relation des étudiants et jeunes actifs avec des retraités de confiance
+            pour un service de linge lavé, séché, repassé et plié.
+        </p>
+
+        <a href="#services" class="btn">Découvrir les services</a>
+    </div>
+
+    <div class="hero-card">
+        <div class="bird">🐦</div>
+        <h3>Linotte</h3>
+        <p>
+            Une application humaine, locale et rassurante qui transforme une corvée
+            en un échange utile entre générations.
+        </p>
+    </div>
+</section>
+
+<section id="histoire">
+    <div class="badge">Histoire de la marque</div>
+
+    <h2>Une idée simple : <span>remettre de l’humain dans un geste ordinaire.</span></h2>
+
+    <p>
+        Pour beaucoup d’étudiants et de jeunes actifs, le linge est une tâche que l’on repousse,
+        que l’on subit et que l’on finit par gérer dans l’urgence. Entre les cours, les partiels,
+        l’alternance, les trajets et les imprévus, trouver le temps de trier, laver, sécher,
+        repasser et plier devient vite une charge mentale de plus.
+    </p>
+
+    <p>
+        Linotte est née de ce constat. D’un côté, des étudiants recherchent un service pratique,
+        fiable et accessible. De l’autre, des retraités actifs souhaitent rester utiles,
+        transmettre leur savoir-faire et recréer du lien dans leur quotidien.
+    </p>
+
+    <div class="soft-block">
+        <h3>Notre promesse</h3>
+        <p>
+            Avec Linotte, les étudiants confient leur linge à des retraités de confiance de leur quartier.
+            Le linge est lavé, séché, repassé, plié, puis rendu prêt à porter.
+            Mais surtout, il est pris en charge avec soin, attention et bienveillance.
+        </p>
+        <p><strong>Linotte — Le soin du linge, la chaleur du lien.</strong></p>
+    </div>
+</section>
+
+<section id="services">
+    <div class="badge">Services & produit</div>
+
+    <h2>Un service simple, utile et rassurant.</h2>
+
+    <p class="lead">
+        Linotte propose une solution complète autour du linge, pensée pour alléger le quotidien
+        des étudiants tout en valorisant l’expérience des retraités actifs.
+    </p>
+
+    <div class="cards">
+        <div class="card">
+            <div class="icon">🧺</div>
+            <h3>Formule Essentielle</h3>
+            <p>Lavage, séchage et pliage du linge du quotidien.</p>
+            <div class="price">À partir de 8 €</div>
+            <p>Idéal pour gagner du temps chaque semaine.</p>
+        </div>
+
+        <div class="card">
+            <div class="icon">👕</div>
+            <h3>Formule Soin</h3>
+            <p>Lavage, séchage, repassage et pliage.</p>
+            <div class="price">À partir de 12 €</div>
+            <p>Pour récupérer un linge propre, net et prêt à porter.</p>
+        </div>
+
+        <div class="card">
+            <div class="icon">⭐</div>
+            <h3>Formule Sérénité</h3>
+            <p>Service régulier avec suivi personnalisé.</p>
+            <div class="price">Sur abonnement</div>
+            <p>Pour déléguer durablement la gestion de son linge.</p>
+        </div>
+    </div>
+
+    <div class="two-columns">
+        <div class="card">
+            <h3>Comment ça marche ?</h3>
+
+            <div class="steps">
+                <div class="step">
+                    <strong>Réservez</strong><br>
+                    Choisissez une Linotte disponible près de chez vous.
+                </div>
+
+                <div class="step">
+                    <strong>Déposez</strong><br>
+                    Confiez votre linge dans un sac identifié.
+                </div>
+
+                <div class="step">
+                    <strong>Récupérez</strong><br>
+                    Votre linge revient propre, plié et repassé selon la formule choisie.
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>L’application Linotte</h3>
+            <p>
+                L’application permet de réserver un créneau, suivre sa commande,
+                échanger avec la personne de confiance, payer de manière sécurisée
+                et évaluer la qualité du service.
+            </p>
+            <p>
+                Elle est pensée pour être claire, simple et rassurante,
+                aussi bien pour les étudiants que pour les retraités.
+            </p>
+        </div>
+    </div>
+</section>
+
+<section id="contact">
+    <div class="badge">Contact</div>
+
+    <h2>Rejoignez la communauté Linotte.</h2>
+
+    <p class="lead">
+        Vous êtes étudiant, jeune actif, retraité ou partenaire local ?
+        Écrivez-nous pour participer au lancement de Linotte.
+    </p>
+
+    <div class="two-columns">
+        <div class="card">
+            <h3>Nous écrire</h3>
+
+            <form>
+                <input type="text" placeholder="Votre nom" required>
+                <input type="email" placeholder="Votre email" required>
+
+                <select>
+                    <option>Je suis étudiant / jeune actif</option>
+                    <option>Je suis retraité</option>
+                    <option>Je suis partenaire</option>
+                    <option>Autre demande</option>
+                </select>
+
+                <textarea placeholder="Votre message"></textarea>
+
+                <button class="btn" type="submit">Envoyer le message</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3>Informations</h3>
+            <p><strong>Email :</strong> contact@linotte.fr</p>
+            <p><strong>Zone de lancement :</strong> quartiers étudiants et résidentiels.</p>
+            <p><strong>Horaires :</strong> du lundi au samedi, selon les disponibilités des Linottes.</p>
+
+            <div class="notice">
+                Ce formulaire est une maquette HTML. Pour recevoir réellement les messages,
+                il faudra le connecter à un service comme Formspree, Netlify Forms ou un backend.
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="vie-privee">
+    <div class="badge">Vie privée</div>
+
+    <h2>Politique de confidentialité</h2>
+
+    <div class="card">
+        <h3>1. Données collectées</h3>
+        <p>
+            Linotte peut collecter les informations nécessaires au fonctionnement du service :
+            nom, prénom, adresse email, numéro de téléphone, adresse de dépôt ou de retrait,
+            profil utilisateur, historique de commandes et messages échangés via la plateforme.
+        </p>
+
+        <h3>2. Finalités d’utilisation</h3>
+        <p>
+            Les données sont utilisées pour permettre la création de compte, la mise en relation,
+            le suivi des commandes, le paiement, la sécurité du service, l’assistance client
+            et l’amélioration de l’expérience utilisateur.
+        </p>
+
+        <h3>3. Partage des données</h3>
+        <p>
+            Les données ne sont partagées qu’avec les personnes ou prestataires nécessaires
+            à la réalisation du service. Linotte ne vend pas les données personnelles
+            de ses utilisateurs.
+        </p>
+
+        <h3>4. Conservation</h3>
+        <p>
+            Les données sont conservées pendant la durée nécessaire à la fourniture du service,
+            puis archivées ou supprimées conformément aux obligations légales applicables.
+        </p>
+
+        <h3>5. Droits des utilisateurs</h3>
+        <p>
+            Chaque utilisateur peut demander l’accès, la rectification, la suppression
+            ou la limitation du traitement de ses données personnelles.
+            Une demande peut être envoyée à : contact@linotte.fr.
+        </p>
+
+        <h3>6. Sécurité</h3>
+        <p>
+            Linotte met en place des mesures techniques et organisationnelles destinées
+            à protéger les informations contre l’accès non autorisé, la perte,
+            l’altération ou la divulgation.
+        </p>
+
+        <div class="notice">
+            Cette politique est une base de travail pour une maquette.
+            Avant une mise en ligne réelle, elle devra être validée juridiquement.
+        </div>
+    </div>
+</section>
+
+<footer>
+    <p><strong>Linotte</strong></p>
+    <p>Le soin du linge, la chaleur du lien.</p>
+    <p>© 2026 Linotte — Tous droits réservés.</p>
+</footer>
+
+</body>
+</html>
