@@ -39,6 +39,11 @@ jobs:
       - name: Unpack site source
         run: python -m zipfile -e site-source.zip site
 
+      - name: Add Linotte page
+        run: |
+          mkdir -p site/linotte
+          cp linotte/index.html site/linotte/index.html
+
       - name: Download runtime assets
         working-directory: site
         run: |
